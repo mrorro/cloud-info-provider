@@ -1,0 +1,11 @@
+<%def name="render_string(k, v, required_type=False, comma=True)">
+% if v is None and not required_type:
+
+% elif v is None and required_type:
+"${k}": null${',' if comma else ''}
+% elif isinstance(v, (str,)):
+"${k}": "${v}"${',' if comma else ''}
+% else:
+"${k}": ${v}${',' if comma else ''}
+% endif
+</%def>

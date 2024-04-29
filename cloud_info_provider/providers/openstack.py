@@ -444,7 +444,7 @@ class OpenStackProvider(base.BaseProvider):
         quotas = defaults.copy()
 
         try:
-            project_quotas = self.nova.quotas.get(self.project_id)
+            project_quotas = self.nova.quotas.get(self.project_id, detail=True)
             for resource in quota_resources:
                 try:
                     quotas[resource] = getattr(project_quotas, resource)

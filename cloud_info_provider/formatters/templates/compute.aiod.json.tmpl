@@ -1,0 +1,47 @@
+<%!
+def render_string(k, v, required_type=False, comma=True):
+    if v is None and not required_type:
+        return ""
+    if v is None and required_type:
+        return f'"{k}": null{"," if comma else ""}'
+    if isinstance(v, (str,)):
+        return f'"{k}": "{v}"{"," if comma else ""}'
+    else:
+        return f'"{k}": {v}{"," if comma else ""}'
+%>
+<%
+    middleware = attributes['middleware']
+    static_compute_info = attributes['static_compute_info']
+    shares = attributes['shares']
+    provider_id = static_compute_info['site_name']
+    service_id = static_compute_info['compute_service_name']
+
+    from six.moves import urllib
+    urlparse_obj = urllib.parse.urlparse(service_id)
+    host_name = service_id
+    if urlparse_obj.scheme:
+        host_name = urlparse_obj.hostname
+%>
+
+{
+    "type": "service",
+    "data": {
+        "provider_id": "${provider_id}",
+        "id": "${service_id}",
+        ${render_string('hostname', host_name)}
+        ${render_string('sitename', static_compute_info['site_name'])}
+    }
+},\
+% for _vo, _share in shares.items():
+<%
+    quotas = _share['quotas']
+%>
+{
+    ${render_string('maxTotalInstances', quotas['instances']['limit'], required_type=True)}
+    ${render_string('totalInstancesUsed', quotas['instances']['in_use'], required_type=True)}
+    ${render_string('maxTotalCores', quotas['cores']['limit'], required_type=True)}
+    ${render_string('totalCoresUsed', quotas['cores']['in_use'], required_type=True)}
+    ${render_string('maxTotalRAMSize', quotas['ram']['limit'], required_type=True)}
+    ${render_string('totalRAMUsed', quotas['ram']['in_use'], required_type=True)}
+}
+% endfor
